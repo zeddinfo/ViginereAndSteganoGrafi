@@ -1,0 +1,108 @@
+<style>
+    div.col {
+        margin: 3px;
+        border-radius: 3px;
+        padding: 3px;
+        text-align: center;
+    }
+    
+    img {
+        width: 75%;
+        border: 5px solid black;
+        border-radius: 4px;
+    }
+    
+    img:hover {
+        box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+    }
+    
+    .btn-download {
+        margin-top: 5px;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+</style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="col-lg-7 mx-auto">
+        <div class="card mt-2 mx-auto p-4 bg-white">
+            <div class="card-body bg-white">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <img src="https://www.gstatic.com/webp/gallery/4.jpg" id="preview" width="400" height="200">
+                        </div>
+
+                        <div class="col">
+                            <img src="https://www.gstatic.com/webp/gallery/2.jpg" id="hasil" href="" width="400" height="200">
+                            <div class="btn-download">
+                                <button class="btn btn-info" id="btn-download">
+                                    <a href="" download="hasil.jpg" id="btn-simpan" onclick="download(this)">Download</a>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button type="button" class="btn btn-success" id="btn-stegano" onclick="stegano()">Stegano</button>
+                <button type="button" class="btn btn-info" id="btn-viginere" style="display: none;" onclick="viginere()">Viginere</button>
+            </footer>
+        </div>
+    </div>
+
+</body>
+
+</html>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    const preview = document.getElementById('preview');
+    preview.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+    }, false);
+
+    const hasil = document.getElementById('hasil');
+    hasil.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+    }, false);
+
+    const canvas = document.getElementById('hasil');
+    const link = document.getElementById('hasil').src;
+    canvas.addEventListener('click', function(e) {
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.arc(100, 75, 50, 0, 2 * Math.PI);
+        ctx.stroke();
+        download(link);
+    });
+
+    const simpan = document.getElementById('btn-download');
+
+    var gambar = document.getElementById('hasil');
+    download = function(el) {
+        var image = gambar.toDataURL('image/jpg');
+        el.href = image;
+    }
+
+    function download(isDownload) {
+        var canvas = document.getElementById("hasil");
+        image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        var link = document.createElement('a');
+        link.download = "my-image";
+        link.href = image;
+        link.click();
+    }
+</script>
