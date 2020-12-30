@@ -38,6 +38,22 @@ function doCrypt(isDecrypt) {
     }
 }
 
+function imgchange(f) {
+    var filePath = $('#file').val();
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        $('#imgs').attr('src',e.target.result);
+    };
+    reader.readAsDataURL(f.files[0]);           
+ }
+
+function cek(){
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    var img = document.getElementById("imgs");
+   ctx.drawImage(img, 0, 0);
+}
+
 ///fungsi untuk menghitung huruf yang sudah dibaca
 function crypt(input, key) {
     var output = "";
@@ -234,6 +250,60 @@ loadFile.addEventListener('change', function(e) {
     fr.readAsDataURL(file);
 });
 
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var img = document.getElementById("imgs");
+
+var sepia = function() {
+	ctx.drawImage(img, 0, 0);
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	for (var i = 0; i < data.length; i += 4) {
+		let red = data[i], green = data[i + 1], blue = data[i + 2];
+
+		data[i] = Math.min(Math.round(0.393 * red + 0.769 * green + 0.189 * blue), 255);
+		data[i + 1] = Math.min(Math.round(0.349 * red + 0.686 * green + 0.168 * blue), 255);
+		data[i + 2] = Math.min(Math.round(0.272 * red + 0.534 * green + 0.131 * blue), 255);
+	}
+    ctx.putImageData(imageData, 0, 0);
+    console.info('sepia', data);
+}
+
+var invert = function() {
+	ctx.drawImage(img, 0, 0);
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	for (var i = 0; i < data.length; i += 4) {
+		data[i]     = 255 - data[i];     // red
+		data[i + 1] = 255 - data[i + 1]; // green
+		data[i + 2] = 255 - data[i + 2]; // blue
+	}
+    ctx.putImageData(imageData, 0, 0);
+    console.info('invert', data);
+};
+
+var grayscale = function() {
+	ctx.drawImage(img, 0, 0);
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	for (var i = 0; i < data.length; i += 4) {
+		var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+		data[i]     = avg; // red
+		data[i + 1] = avg; // green
+		data[i + 2] = avg; // blue
+	}
+    ctx.putImageData(imageData, 0, 0);
+    console.info('grey', data);
+};
+
+var original = function() {
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+    console.info('normal', data);
+};
+
+
 function maxValue(value1, value2){
     cawal = Math.max.apply(null, value1);
     cakhir = Math.max.apply(null, value2);
@@ -401,4 +471,20 @@ function decodeUtf8(arrayBuffer) {
         }
     }
     return result;
+}
+
+const inputs = document.querySelectorAll('[name=color]');
+for (const input of inputs) {
+	input.addEventListener("change", function(evt) {
+		switch (evt.target.value) {
+			case "inverted":
+				return invert();
+			case "grayscale":
+				return grayscale();
+			case "sepia":
+				return sepia();
+			default:
+				return original();
+		}
+	});
 }
