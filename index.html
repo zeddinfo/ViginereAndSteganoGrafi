@@ -66,15 +66,21 @@
                                                 <button type="button" id="hideData" style="display: none;" class="btn btn-info">Hidedata</button>
                                                 <span id="error" style="display: none;">Format tidak di dukung !!!</span>
                                             </div>
+                                            
+                                            <select class="form-control mb-2" id="tipe-img" style="display: none;">
+                                                <option value="Normal"> Normal </option>
+                                                <option value="GreyScale" > GreyScale </option>
+                                              </select>
+
                                             <div class="alert alert-info" id="hide" style="display: none;"></div>
 
                                             <div class="form-group hasil-gambar" style="display: none;"> <label for="uploadFile"><b>Hasil Gambar setelah di hide</b> </label><br>
-                                                <canvas id="canvas" width="400" height="400"></canvas>
+                                                <canvas id="canvas" width="512" height="512"></canvas>
                                                 <hr/>
                                             </div>
 
                                             <div class="form-group download" style="display: none;"> <label for="uploadFile"><b>Silahkan klik kanan dan download gambar ini</b> </label><br>
-                                                <canvas id="secret" width="400" height="400"></canvas>
+                                                <canvas id="secret" width="512" height="512"></canvas>
                                                 <hr/>
                                             </div>
 
@@ -118,6 +124,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="main.js" type="text/javascript"></script>
 <script>
+
+    $(document).ready(function(){
+        $('#tipe-img').change(function(){
+            var image = $(this).val();
+            console.log(image);
+        });
+    })
     ///Fungsi menampilkan dan menghilangkan beberapa form
     function stegano() {
         $('.first').hide("slow");
@@ -128,6 +141,7 @@
         $('.file-download').show("slow");
         $('#btn-stegano').hide();
         $('#btn-viginere').show();
+        $('#tipe-img').show();
     }
 
     function viginere() {

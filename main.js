@@ -3,9 +3,9 @@ File berisi fungsi pada aplikasi, mulai dari viginere, enkrip, dekrip dan fungsi
 */
 
 ///Fungsi membaca isi file txt
-document.getElementById('uploadBtn').addEventListener('change', function() {
+document.getElementById('uploadBtn').addEventListener('change', function () {
     var fr = new FileReader();
-    fr.onload = function() {
+    fr.onload = function () {
         document.getElementById('teks').value = fr.result;
         console.log("Teks : " + fr.result);
     };
@@ -30,12 +30,37 @@ function doCrypt(isDecrypt) {
     var textElem = document.getElementById("output");
     textElem.innerHTML = crypt(document.getElementById('teks').value, key);
     var secret = document.getElementById('teks').value = textElem.innerHTML;
+    ///validasi kalau spasi
+    ///buat fungsi pada saat mengambil nilai citra, convert to binner, ambil nilai terakhir kemudian replace nilai binner terakhir citra dengan masing2 binner pada viginere sesuai uturan
+    ///get value 
     console.log("Result Viginere : " + secret);
     if (secret != '') {
         $('#btn-download').show();
     } else {
         $('#btn-download').hide();
     }
+}
+
+function globaldoCrypt(){
+    var key = filterKey(document.getElementById("key").value);
+    var textElem = document.getElementById("output");
+    var input = crypt(document.getElementById('teks').value, key);
+    var secret = document.getElementById('teks').value = textElem.innerHTML;
+
+    var output = "";
+    for (var i = 0, j = 0; i < input.length; i++) {
+        var c = input.charCodeAt(i);
+        if (isUppercase(c)) {
+            output += String.fromCharCode((c - 65 + key[j % key.length]) % 26 + 65);
+            j++;
+        } else if (isLowercase(c)) {
+            output += String.fromCharCode((c - 97 + key[j % key.length]) % 26 + 97);
+            j++;
+        } else {
+            output += input.charAt(i);
+        }
+    }
+    return output;
 }
 
 ///fungsi untuk menghitung huruf yang sudah dibaca
@@ -54,6 +79,28 @@ function crypt(input, key) {
         }
     }
     return output;
+}
+
+///viginere
+function charToBiner(data){
+    let outputStr = data.split('') // split in single chars
+                      .map(c => c.charCodeAt(0) // get the charcode (10 base)
+                                  .toString(2)) // transform it back to a string (2 base)
+                      .join(' ') // make single string from array
+
+    // console.log(outputStr);
+    return outputStr;
+}
+
+function intToBiner(data){
+    const arr = [];
+
+    for (var i in data){
+        const str = data[i];
+        const value = str.toString(2)
+        arr.push(value);
+    }
+    return arr;
 }
 
 ///fungsi untuk memfilter password
@@ -82,6 +129,23 @@ function isLowercase(c) {
     return 97 <= c && c <= 122;
 }
 
+function getCitra(value){
+    // for(i = 0; i <= value.length; i++){
+    //     // console.log('data i ke', [i], 'adalah', value[i]);
+    //     let binerViginer = value[i].charCodeAt(0).toString(2);
+    //     for(j=0; j<= binerViginer.length; j++){
+    //         // console.log('data biner ke', [j], 'adalah', binerViginer[j].charCodeAt(0).toString(2) + "-");
+    //         if(j == 6){
+    //             console.log('data : '+value[i],'binernya adalah', binerViginer)
+    //             console.log('lastBinner adalah',binerViginer[j]);
+    //             // break;
+    //         }
+    //         // break;
+    //     }
+    // }
+    console.log(value.length);
+}
+
 ///Start Stegano
 
 /*Deklarasi variabel dan Mengambil nilai pada HTML*/
@@ -90,6 +154,7 @@ var
     canvas = document.getElementById('canvas'),
     secret = document.getElementById('secret'),
     coverAfter = document.getElementById('coverAfter'),
+    tipe = document.getElementById('tipe-img').value,
     ctx = canvas.getContext('2d'),
     ctxSecret = secret.getContext('2d'),
     ctxCoverAfter = coverAfter.getContext('2d'),
@@ -98,8 +163,9 @@ var
     clampedArray,
     index = 0;
 
+
 ///membaca file
-myFile.addEventListener('change', function(e) {
+myFile.addEventListener('change', function (e) {
     var file = e.target.files[0];
     var fr = new FileReader();
     fr.addEventListener("load", loadEvent);
@@ -113,8 +179,51 @@ myFile.addEventListener('change', function(e) {
     fr.readAsArrayBuffer(file);
 });
 
+function bin_to_dec(bstr) { 
+    // console.log('bstr',bstr);
+    var data = [];
+    for (i in bstr){
+        data.push(parseInt((bstr[i] + '').replace(/[^01]/gi, ''), 2));
+    }
+    // return parseInt((bstr + '')
+    // .replace(/[^01]/gi, ''), 2);
+    console.log(data);
+}
+
+function noiseCitra(secret, citraAwal){
+    // console.log('binercitraawa', citraAwal);
+    const arrSecret = [];
+    for(var i in secret){
+        arrSecret.push(secret[i].charCodeAt(0).toString(2));
+    }
+    console.log(arrSecret.join(''));
+    const allScret = arrSecret.join('');
+    var arr = citraAwal.join('');
+    // console.log('citra', arr);
+  
+    var k = 0;
+    var secLength = allScret.length;
+    // console.log('lengt secret', secLength);
+    var secure = [];
+    for(i = 0; i < arr.length; i++){
+        if((i % 7) == 0){
+            secure.push(allScret[k]);
+        } else {
+            secure.push(arr[i]);
+        }
+        k++;
+    }
+    const strSecure = secure.join('');
+    const result = strSecure.match(/.{1,8}/g);
+
+    console.log(strSecure);
+    bin_to_dec(result);
+    console.log(result);
+}
+
+
 ///Fungsi HideData waktu di klik
-hideData.addEventListener('click', function() {
+hideData.addEventListener('click', function () {
     var
         cover = document.getElementById('cover'),
         file = cover.files[0],
@@ -126,26 +235,75 @@ hideData.addEventListener('click', function() {
         console.info("Sedang di load, tunggu sampai selesai");
     }
 
+    function getPixel(x, y, clampedArray){  
+        var arr = Array();
+        var i =((y*512)+x)*4;
+        // console.log('panjang',clampedArray.data.length);
+
+        console.log('clampedArray',clampedArray);
+        arr[0]=clampedArray.data[i]; //warna merah
+        arr[1]=clampedArray.data[i+1]; //warna hijau
+        arr[2]=clampedArray.data[i+2]; //warna biru
+        arr[3]=clampedArray.data[i+3] //transparensi/alpha
+        // return arr;
+        // console.log(arr)
+        return arr;
+    }
+
     function loadEndEvent(e) {
-        console.info("Selesai");
-        console.info('View1 :', view);
+        console.log("Selesai");
         var img = new Image();
         img.src = e.target.result;
 
-        img.onload = function() {
-            ctx.drawImage(img, 0, 0);
-            clampedArray = ctx.getImageData(0, 0, canvas.height, canvas.width);
-            console.log(clampedArray);
-            console.log(view);
-            readByte(view);
-            ctxSecret.putImageData(clampedArray, 0, 0);
+        console.log('secret viginere', globaldoCrypt());  
+        console.log('secret to binner',charToBiner(globaldoCrypt()));
+        // console.log('citra awal', getPixel(0,0));
+                  
+            img.onload = function () {
+                if (tipe == 'Normal') {
+                    alert('gras');
+                    ctx.drawImage(img, 0, 0);
+                    clampedArray = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    console.log('pixel RGBA',getPixel(0, 0, clampedArray));
+                    console.log('biner pixel',intToBiner(getPixel(0, 0, clampedArray)))
+                    console.log('clamped',clampedArray.data);
+                    console.log('citra noise', noiseCitra(globaldoCrypt(), intToBiner(getPixel(0,0,clampedArray))));
+                    // getCitra(clampedArray.data);
+                    // for(i in clampedArray.data){
+                    //     console.log('clam ', clampedArray.data[i]);
+                    // }
+                    const data = clampedArray.data;
+                    console.log('Image Normal',data);
+                    readByte(view);
+                    ctxSecret.putImageData(clampedArray, 0, 0);
+                    console.log('View1 :', view);
+                    // getCitra(clampedArray);
+                } 
+            if (tipe == 'GreyScale') {
+                alert('grey');
+                ctx.drawImage(img, 0, 0);
+                clampedArray = ctx.getImageData(0, 0, canvas.height, canvas.width);
+                console.log(clampedArray);
+                const data = clampedArray.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg; // red
+                    data[i + 1] = avg; // green
+                    data[i + 2] = avg; // blue
+                }
+                ctx.putImageData(imageData, 0, 0);
+                console.log('data greyscale', data);
+                readByte(view);
+                ctxSecret.putImageData(clampedArray, 0, 0);
+            }
+
         }
     }
     fr.readAsDataURL(file);
 });
 
 ///Untuk meload gambar setelah di klik button hidenya
-loadFile.addEventListener('change', function(e) {
+loadFile.addEventListener('change', function (e) {
     var file = e.target.files[0];
     var fr = new FileReader();
 
@@ -157,7 +315,7 @@ loadFile.addEventListener('change', function(e) {
         img.src = e.target.result;
         // menunggu 3 detik untuk meload gambar
         // kemudian gambar di tampilkan pada class canvas
-        img.onload = function() {
+        img.onload = function () {
             ctxCoverAfter.drawImage(img, 0, 0);
             // mengembalikan ArrayBuffer Object untuk compresi gambar (Opsional)
             //var arrayBuffer = evt.target.result;
@@ -187,7 +345,7 @@ loadFile.addEventListener('change', function(e) {
             }
 
             console.info('Total length :' + totalLength + ', Last Index : ' + lastIndex)
-                // ambil dari index pertama - panjang secret
+            // ambil dari index pertama - panjang secret
             var secretLength = totalLength;
             // inialisasi Unsigned array(8 bit)
             // divided dari 4 jadi 1 karakter untuk 8bit
@@ -214,16 +372,16 @@ loadFile.addEventListener('change', function(e) {
             console.log(newUint8Array)
             // console.info('View1 :', view);
             // console.info('View2 :', newUint8Array);
-            
+
             ///compare ke mse dan psnr
-            console.info('Matriks Citra Awal : ',comparetoMatrix(view, 3)); ///citra awal
-            console.info('Matriks Citra Akhir :',comparetoMatrix(newUint8Array, 3)); ///citra akhir
-            console.info('MSE :=> ',compare(view, newUint8Array));
-            console.info('PSNR :=> ',psnr(compare(view, newUint8Array), maxValue(view, newUint8Array)));
-                // decode menjadi kode ASCII
+            console.info('Matriks Citra Awal : ', comparetoMatrix(view, 3)); ///citra awal
+            console.info('Matriks Citra Akhir :', comparetoMatrix(newUint8Array, 3)); ///citra akhir
+            console.info('MSE :=> ', compare(view, newUint8Array));
+            console.info('PSNR :=> ', psnr(compare(view, newUint8Array), maxValue(view, newUint8Array)));
+            // decode menjadi kode ASCII
             var result = decodeUtf8(newUint8Array);
             console.log(result)
-                // force download results into .txt files
+            // force download results into .txt files
             saveByteArray(result.split(''), 'stegano.txt');
 
         }
@@ -234,17 +392,18 @@ loadFile.addEventListener('change', function(e) {
     fr.readAsDataURL(file);
 });
 
-function maxValue(value1, value2){
+function maxValue(value1, value2) {
     cawal = Math.max.apply(null, value1);
     cakhir = Math.max.apply(null, value2);
     return Math.max(cawal, cakhir);
 }
 
-function comparetoMatrix(list, elementPerSubArray){
-    var matrix = [], i, k;
+function comparetoMatrix(list, elementPerSubArray) {
+    var matrix = [],
+        i, k;
 
-    for(i = 0, k = -1; i < list.length; i++){
-        if(i % elementPerSubArray === 0){
+    for (i = 0, k = -1; i < list.length; i++) {
+        if (i % elementPerSubArray === 0) {
             k++;
             matrix[k] = [];
         }
@@ -253,21 +412,21 @@ function comparetoMatrix(list, elementPerSubArray){
     return matrix;
 }
 
-function compare(image1, image2){
+function compare(image1, image2) {
     ///mse 
     var total = 0;
-    for(var i=0;i<image1.length;i++){
-        for(var j=0;j<image2.length;j++){
-           total+= Math.pow((image1[i] - image2[j]), 2);
-           break;
+    for (var i = 0; i < image1.length; i++) {
+        for (var j = 0; j < image2.length; j++) {
+            total += Math.pow((image1[i] - image2[j]), 2);
+            break;
         }
     }
     var result = total / image1.length;
     return result;
 }
 
-function psnr(mse, max){
-    return 10 * Math.log10(max/mse);
+function psnr(mse, max) {
+    return 10 * Math.log10(max / mse);
 }
 
 function readByte(secret) {
@@ -279,13 +438,14 @@ function readByte(secret) {
             // 8bits, dengan demikian 8bits ini dibagi 2. Setiap 2 bit harus diganti
             // LSB (Paling sedikit signifikan) dari byte byte
             var secretLength = length * 4;
-            console.info('Secret Length(' + length + 'x4) : ' + secretLength)
-                // karena imageData kami adalah array yang diketik (Uint8ClampedArray)
-                // itu hanya dapat menyimpan nilai tidak lebih dari 256 (8bit atau 1byte)
+            console.log('Secret Length(' + length + 'x4) : ' + secretLength)
+            // karena imageData kami adalah array yang diketik (Uint8ClampedArray)
+            // itu hanya dapat menyimpan nilai tidak lebih dari 256 (8bit atau 1byte)
             if (secretLength > 255) {
                 // periksa berapa kali kita perlu indeks imageData
                 // untuk menyimpan panjang rahasia kami
                 var division = secretLength / 255;
+                console.log('division');
                 // integer number
                 if (division % 1 === 0) {
                     for (var k = 0; k < division; k++) {
@@ -333,9 +493,9 @@ function readByte(secret) {
         // console.log(i + ' : ' + first6bitMiddle);
         // console.log(i + ' : ' + first8bitMiddle);
         // start replacing our secret's bit on LSB
-        replaceByte(first2bit);
-        replaceByte(first4bitMiddle);
-        replaceByte(first6bitMiddle);
+        // replaceByte(first2bit);
+        // replaceByte(first4bitMiddle);
+        // replaceByte(first6bitMiddle);
         replaceByte(first8bitMiddle);
     }
 }
@@ -347,11 +507,11 @@ function replaceByte(bits) {
     index++;
 }
 
-var saveByteArray = (function() {
+var saveByteArray = (function () {
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
-    return function(data, name) {
+    return function (data, name) {
         var blob = new Blob(data, {
                 type: "octet/stream"
             }),
