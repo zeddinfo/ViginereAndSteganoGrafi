@@ -188,6 +188,7 @@ function bin_to_dec(bstr) {
     // return parseInt((bstr + '')
     // .replace(/[^01]/gi, ''), 2);
     console.log(data);
+    return data;
 }
 
 function noiseCitra(secret, citraAwal){
@@ -217,8 +218,9 @@ function noiseCitra(secret, citraAwal){
     const result = strSecure.match(/.{1,8}/g);
 
     console.log(strSecure);
-    bin_to_dec(result);
+    const hasil = bin_to_dec(result);
     console.log(result);
+    return hasil;
 }
 
 
@@ -269,6 +271,9 @@ hideData.addEventListener('click', function () {
                     console.log('clamped',clampedArray.data);
                     console.log('citra noise', noiseCitra(globaldoCrypt(), intToBiner(getPixel(0,0,clampedArray))));
                     // getCitra(clampedArray.data);
+                    console.log('mse', compare(noiseCitra(globaldoCrypt(), intToBiner(getPixel(0,0,clampedArray))), getPixel(0, 0, clampedArray)))
+                    const mse =  compare(noiseCitra(globaldoCrypt(), intToBiner(getPixel(0,0,clampedArray))), getPixel(0, 0, clampedArray));
+                    console.log('psnr', psnr(mse, 255));
                     // for(i in clampedArray.data){
                     //     console.log('clam ', clampedArray.data[i]);
                     // }
@@ -418,15 +423,16 @@ function compare(image1, image2) {
     for (var i = 0; i < image1.length; i++) {
         for (var j = 0; j < image2.length; j++) {
             total += Math.pow((image1[i] - image2[j]), 2);
+            // console.log('jumlah'+image1[i]+'-'+image2[j]+'total' +total);
             break;
         }
     }
-    var result = total / image1.length;
+    var result = total / 8;
     return result;
 }
 
 function psnr(mse, max) {
-    return 10 * Math.log10(max / mse);
+    return 100 * (Math.log10(max / mse));
 }
 
 function readByte(secret) {
