@@ -97,8 +97,9 @@ function intToBiner(data){
 
     for (var i in data){
         const str = data[i];
-        const value = str.toString(2)
-        arr.push(value);
+        // const value = str.toString(2)
+        const binary = toBinary(data[i], 8);
+        arr.push(binary);
     }
     return arr;
 }
@@ -179,6 +180,12 @@ myFile.addEventListener('change', function (e) {
     fr.readAsArrayBuffer(file);
 });
 
+function toBinary(integer, withPaddingLength) {
+    let str = integer.toString(2);
+    return str.padStart(withPaddingLength, "0");
+  }
+
+
 function bin_to_dec(bstr) { 
     // console.log('bstr',bstr);
     var data = [];
@@ -190,6 +197,8 @@ function bin_to_dec(bstr) {
     console.log(data);
     return data;
 }
+
+
 
 function noiseCitra(secret, citraAwal){
     // console.log('binercitraawa', citraAwal);
@@ -222,6 +231,7 @@ function noiseCitra(secret, citraAwal){
     console.log(result);
     return hasil;
 }
+
 
 
 ///Fungsi HideData waktu di klik
@@ -268,6 +278,7 @@ hideData.addEventListener('click', function () {
                     clampedArray = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     console.log('pixel RGBA',getPixel(0, 0, clampedArray));
                     console.log('biner pixel',intToBiner(getPixel(0, 0, clampedArray)))
+                    console.log('new binner', toBinary(getPixel(0, 0, clampedArray), 8))
                     console.log('clamped',clampedArray.data);
                     console.log('citra noise', noiseCitra(globaldoCrypt(), intToBiner(getPixel(0,0,clampedArray))));
                     // getCitra(clampedArray.data);
@@ -420,19 +431,45 @@ function comparetoMatrix(list, elementPerSubArray) {
 function compare(image1, image2) {
     ///mse 
     var total = 0;
-    for (var i = 0; i < image1.length; i++) {
-        for (var j = 0; j < image2.length; j++) {
-            total += Math.pow((image1[i] - image2[j]), 2);
-            // console.log('jumlah'+image1[i]+'-'+image2[j]+'total' +total);
-            break;
-        }
-    }
+    console.log('image 1', image1);
+    console.log('image 2', image2);
+
+    var total1 = Math.pow((image1[0] - image2[0]), 2);
+    var total2 = Math.pow((image1[1] - image2[1]), 2);
+    var total3 = Math.pow((image1[2] - image2[2]), 2);
+    var total4 = Math.pow((image1[3] - image2[3]), 2);
+
+    console.log('1', total1);
+    console.log('2', total2);
+    console.log('3', total3);
+    console.log('4', total4);
+
+    total = (total1 + total2 + total3 + total4);
+
+    // for(var i in image1){
+    //     total+= Math.pow((image1[i] - image2[i]),2);
+        
+    //     // for (var j in image2){
+    //     //     total += Math.pow((image1[i] - image2[j]),2);
+    //     //     break;
+    //     //     j++;
+    //         console.log('step', image1[i] + '-' + image2[i] + '=' + total);
+    //     // }
+    // }
+
+    // // for (var i = 0; i < image1.length; i++) {
+    // //     for (var j = 0; j < image2.length; j++) {
+    // //         total += Math.pow((image2[j] - image1[i]), 2);
+    // //         console.log('jumlah'+image2[j]+'-'+image1[i]+'total' +total);
+    // //         break;
+    // //     }
+    // // }
     var result = total / 8;
     return result;
 }
 
 function psnr(mse, max) {
-    return 100 * (Math.log10(max / mse));
+    return 20 * (Math.log10(max / mse));z
 }
 
 function readByte(secret) {
@@ -488,6 +525,7 @@ function readByte(secret) {
         // gunakan masking, untuk menghapus bit, dan ambil bit yang kita inginkan saja
         // Ambil hanya 2 bit pertama, mis .: 0111 0011 => 0000 0011
         var first2bit = (asciiCode & 0x03); // 0x03 = 3
+        // console.log('first2bit', first2bit);
         // Ambil hanya 4 bit pertama (2bit di akhir), mis .: 0111 0011 => 0000 0000
         var first4bitMiddle = (asciiCode & 0x0C) >> 2; // 0x0C = 12, bergeser ke kanan 2 bit atau bagi 2 ^ 2, karena kita ingin mengambil 2 bit pertama di akhir
         // Ambil hanya 6 bit pertama (2bit di akhir), mis .: 0111 0011 => 0011 0000
@@ -495,9 +533,9 @@ function readByte(secret) {
         // Ambil hanya 8 bit pertama (2bit di akhir), mis .: 0111 0011 => 0100 0000
         var first8bitMiddle = (asciiCode & 0xC0) >> 6; // 0xC0 = 192, bergeser ke kanan 6 bit atau bagi 2 ^ 6, karena kita ingin mengambil 2 bit pertama di akhir
         // console.log(i + ' : ' + first2bit);
-        // console.log(i + ' : ' + first4bitMiddle);
-        // console.log(i + ' : ' + first6bitMiddle);
-        // console.log(i + ' : ' + first8bitMiddle);
+        // console.log('data 4 bit',i + ' : ' + first4bitMiddle);
+        // console.log('data 6 bit',i + ' : ' + first6bitMiddle);
+        // console.log('data 8 bit',i + ' : ' + first8bitMiddle);
         // start replacing our secret's bit on LSB
         // replaceByte(first2bit);
         // replaceByte(first4bitMiddle);
